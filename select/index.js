@@ -24,10 +24,10 @@ export class Select {
    */
   getTemplate = (items = [], placeholder = 'Выберите элемент') => `
   <div class="select__input" data-type="select">
-    <span data-type="input">${ placeholder }</span>
+    <span data-type="placeholder">${ placeholder }</span>
     <img class="select__img" src="select/down-arrow.svg" alt="" width="15" height="15" data-type="image"> 
   </div>
-  <div class="select__dropdown">
+  <div class="select__dropdown" data-type="dropdown">
     <ul class="select__list">
       ${
         items.map(({ id, value }) => `
@@ -67,7 +67,7 @@ export class Select {
    * Метод открытия/закрытия селекта
    */
   toggle() {
-    if (this.selectNode.classList.contains('active')) {
+    if (this.selectInput.classList.contains('select__input--active')) {
       this.close();
     } else {
       this.open();
@@ -81,9 +81,12 @@ export class Select {
     this.selectNode.classList.add('select');
     this.selectNode.addEventListener('click', this.clickHandler);
     this.selectNode.innerHTML = this.getTemplate(this.items, this.placeholder);
-    this.selectImg = this.selectNode.querySelector('[data-type="image"]');
-    this.selectInput = this.selectNode.querySelector('[data-type="input"]');
+
+    this.selectInput = this.selectNode.querySelector('[data-type="select"]');
+    this.selectImg = this.selectInput.querySelector('[data-type="image"]');
+    this.selectPlaceholder = this.selectInput.querySelector('[data-type="placeholder"]');
     this.selectItems = this.selectNode.querySelectorAll('[data-type="item"]');
+    this.selectDropDown = this.selectNode.querySelector('[data-type="dropdown"]');
 
     // Определение состояния селекта в случае наличия во входных параметрах дефолтного состояния селекта
     if (this.placeholder) {
@@ -97,16 +100,49 @@ export class Select {
   }
 
   open() {
-    this.selectNode.classList.add('active');
+    this.selectInput.classList.add('select__input--active');
     this.selectImg.classList.add('select__img--reverse');
+
+    // Функция планирования перерисовки
+    const raf = function (fn) {
+      requestAnimationFrame(function () {
+          fn();
+      });
+    };
+
+    // Обработчик события trainsitionend, срабатывающий при открытии списка пунктов
+    const openTransitionendHandler = () => {
+      this.selectDropDown.classList.add('select__dropdown--entered');
+      this.selectDropDown.classList.remove('select__dropdown--enter');
+      this.selectDropDown.classList.remove('select__dropdown--entering');
+
+      this.selectDropDown.removeEventListener('transitionend', openTransitionendHandler);
+    }
+    
+    this.selectDropDown.classList.add('select__dropdown--enter');
+    raf(() => {
+      this.selectDropDown.classList.add('select__dropdown--entering');
+    });
+    this.selectDropDown.addEventListener('transitionend', openTransitionendHandler);
 
     document.addEventListener('click', this.outsideClickHandler);
   }
 
   close() {
-    this.selectNode.classList.remove('active');
     this.selectImg.classList.remove('select__img--reverse');
+    this.selectDropDown.classList.add('select__dropdown--exit');
 
+    // Обработчик события trainsitionend, срабатывающий при закрытии списка пунктов
+    const closeTransitionendHandler = () => {
+      this.selectDropDown.classList.remove('select__dropdown--entered');
+      this.selectDropDown.classList.remove('select__dropdown--exit');
+      this.selectInput.classList.remove('select__input--active');
+
+      this.selectDropDown.removeEventListener('transitionend', closeTransitionendHandler);
+    }
+
+    this.selectDropDown.addEventListener('transitionend', closeTransitionendHandler);
+    
     document.removeEventListener('click', this.outsideClickHandler);
   }
 
@@ -119,7 +155,7 @@ export class Select {
     if (!target.classList.contains('select__item--selected')) {
       // Установка нового состояния селекта
       const item = this.items[id];
-      this.selectInput.textContent = item.value;
+      this.selectPlaceholder.textContent = item.value;
 
       // Выеделения выбранного пункта
       this.selectItems.forEach(el => {
