@@ -1,3 +1,101 @@
-h1 {
-  color: green;
+$height: 50px;
+$border-color: #aaaaaa;
+$background-color: rgba(245, 191, 12, 0.2);
+$dark-background-color: rgba(245, 191, 12, 0.4);
+$scroll-color: rgba(0,0,0,0.5);
+
+.wrapper {
+  width: 500px;
+  padding-top: 50px;
+  margin: 0 auto;
+}
+
+.select {
+  position: relative;
+  width: 100%;
+  font-family: 'Roboto', Arial, sans-serif;
+  font-size: 18px;
+
+  &__input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: $height;
+    padding: 0 15px;
+    border: 2px solid $border-color;
+    border-radius: 5px;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: $height;
+    right: 0;
+    left: 0;
+    display: none;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 2px solid $border-color;
+    border-radius: 5px;
+
+    &::-webkit-scrollbar {
+      width: 7px;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      background-color: $scroll-color;
+    }
+  }
+
+  &__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    padding: 10px;
+
+    &:not(:last-child) {
+      border-bottom: 2px solid $border-color;
+    }
+
+    &:hover {
+      cursor: pointer;
+      transition: 0.2s;
+      background-color: $background-color;
+    }
+  }
+}
+
+.select__item {
+  &--selected {
+    background-color: $dark-background-color;
+
+    &:hover {
+      cursor: default;
+      background-color: $dark-background-color;
+    }
+  }
+}
+
+.select__img {
+  transition: 0.5s;
+
+  &--reverse {
+    transform: rotate(180deg);
+  }
+}
+
+.select.active {
+  .select__input {
+    border-bottom: none;
+  }
+
+  .select__dropdown {
+    display: block;
+  }
 }
