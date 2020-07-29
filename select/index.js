@@ -58,7 +58,7 @@ export class Select {
    * Обработчик события клика за пределы селекта
    */
   outsideClickHandler = (evt) => {
-    if (evt.target.contains(this.selectNode)) {
+    if (!this.selectNode.contains(evt.target)) {
       this.close();
     }
   }
